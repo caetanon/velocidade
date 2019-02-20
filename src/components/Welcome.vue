@@ -45,9 +45,17 @@
           = "Planning"
           span  ({{ time.planning }}h)
         label
+          input(type="checkbox" v-model="dailys" @change="sumCerimoniesTime")
+          = "Dailys"
+          span  ({{ time.dailys }}h)
+        label
           input(type="checkbox" v-model="grooming" @change="sumCerimoniesTime")
           = "Grooming"
           span  ({{ time.grooming }}h)
+        label
+          input(type="checkbox" v-model="retrospective" @change="sumCerimoniesTime")
+          = "Restrospective"
+          span  ({{ time.retrospective }}h)
         label
           input(type="checkbox" v-model="prereview" @change="sumCerimoniesTime")
           = "Pre Review"
@@ -57,7 +65,7 @@
           = "Review"
           span  ({{ time.review }}h)
       p.totalTime Tempo total em cerimônias:
-        strong {{ totalCerimonyTime }}h
+        strong {{ sumCerimoniesTime }}h
       p.buttons
         button(@click="showHollidays") Anterior
         button(@click="showTeam") Próximo
@@ -85,8 +93,8 @@
 
     .screen(v-if="isShowingResult")
       h1 {{ sprint.name }}
-      p Story Points: {{ totalSprintStoryPoints }} pts
-      p Feriados: {{ hollidays }} dias
+      h2 {{ sprintStoryPoints }} Story Points
+      p Feriados: {{ hollidays }} dia(s)
       p Cerimônias: {{ totalCerimonyTime }} horas
       p Capacity: {{ sprintCapacityDays }} dias
 
@@ -97,6 +105,9 @@
           p {{ member.absense ? member.absense : 'Sem' }} {{ member.absense > 1 ? 'ausências programadas' : 'ausência programada' }} 
           p Working Days: {{ member.workingDays }} dias
           p Capacity: {{ member.capacityHours }} horas | {{ member.capacityDays }} dias
+      
+      p.buttons
+        button(@click="showTeam") Anterior
 </template>
 
 <script>
@@ -107,8 +118,8 @@ export default {
       feedback: null,
 
       isShowingPreviousSprint: true,
-      previousSprintDays: 10,
-      previousSprintPoints: 40,
+      previousSprintDays: 38.83,
+      previousSprintPoints: 47,
       
       sprint: {
         name: '',
@@ -119,19 +130,23 @@ export default {
       hollidays: 0,
       isShowingHollidays: false,
 
-      totalCerimonyTime: 10,
+      totalCerimonyTime: 17.5,
       isShowingCerimonies: false,
       aep: true,
       planning: true,
       grooming: false,
       prereview: false,
+      retrospective: true,
       review: true,
+      dailys: true,
       time: {
         aep: 4,
-        planning: 2,
+        planning: 4,
         grooming: 2,
         prereview: 1,
-        review: 4,
+        retrospective: .5,
+        review: 3,
+        dailys: 4,
       },
 
       isShowingTeam: false,
@@ -144,7 +159,6 @@ export default {
       ],
 
       isShowingResult: false,
-      totalSprintStoryPoints: 0
     }
   },
   methods: {
@@ -180,14 +194,7 @@ export default {
       this.isShowingResult = true;
     },
 
-    sumCerimoniesTime(){
-      this.totalCerimonyTime = 0;
-      this.totalCerimonyTime += this.aep ? this.time.aep : 0;
-      this.totalCerimonyTime += this.planning ? this.time.planning : 0;
-      this.totalCerimonyTime += this.grooming ? this.time.grooming : 0;
-      this.totalCerimonyTime += this.prereview ? this.time.prereview : 0;
-      this.totalCerimonyTime += this.review ? this.time.review : 0;
-    },
+    
     addTeamMember(){
       this.team.push({
         teamMember: '',
@@ -198,6 +205,18 @@ export default {
   
   },
   computed: {
+    sumCerimoniesTime(){
+      this.totalCerimonyTime = 0;
+      this.totalCerimonyTime += this.aep ? this.time.aep : 0;
+      this.totalCerimonyTime += this.planning ? this.time.planning : 0;
+      this.totalCerimonyTime += this.grooming ? this.time.grooming : 0;
+      this.totalCerimonyTime += this.prereview ? this.time.prereview : 0;
+      this.totalCerimonyTime += this.review ? this.time.review : 0;
+      this.totalCerimonyTime += this.dailys ? this.time.dailys : 0;
+      this.totalCerimonyTime += this.retrospective ? this.time.retrospective : 0;
+      
+      return this.totalCerimonyTime;
+    },
     sprintWorkingDays(){
       return 10 - this.hollidays;
     },
@@ -213,6 +232,9 @@ export default {
     },
     sprintCapacityDays(){
       return this.validTeam.reduce((acc,member) => acc+parseFloat(member.capacityDays), 0)
+    },
+    sprintStoryPoints(){
+      return Math.round((this.sprintCapacityDays*parseFloat(this.previousSprintPoints))/parseFloat(this.previousSprintDays));
     }
   }
 }
