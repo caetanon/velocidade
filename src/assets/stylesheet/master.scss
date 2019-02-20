@@ -1,8 +1,11 @@
 @import '_variables';
+@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Roboto Condensed', sans-serif;
 }
 html {
   font-size: 10px;
@@ -13,6 +16,23 @@ body {
   font-size: 1.6rem;
 }
 
+table {
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  th, td {
+    border: 1px solid rgba($light-teal, .3);
+    padding: 1rem;
+  }
+}
+
+input {
+  font-size: 1.6rem;
+  padding: .5rem 1rem;
+  border: 1px solid $light-teal;
+  border-radius: 3px;
+}
+
 button {
   padding: 1rem 2rem;
   border-radius: 5px;
@@ -21,6 +41,7 @@ button {
   color: $teal;
   transition: .5s all;
   cursor: pointer;
+  text-transform: uppercase;
 
   &:hover {
     background-color: $light-teal;
@@ -36,20 +57,44 @@ button {
   justify-content: center;
   flex-direction: column;
 
+  .buttons {
+    margin: 3rem 0;
+
+    button {
+      margin: 1rem;
+    }
+  }
+
   > label {
     padding: 0 0 2rem;
     font-size: 2rem;
+    text-transform: uppercase;
   }
 }
 
 .selectionBox {
   display: block;
-  padding: 2rem 3rem;
-  background-color: $light-teal;
+  background-color: rgba($light-teal, .5);
+  margin-bottom: 10px;
+  min-width: 30rem;
+  border-radius: 3px;
+  box-shadow: 0 0 2px $light-teal;
 
   label {
     display: flex;
     align-items: center;
+    padding: 1rem;
+    border-top: 1px solid rgba($dark, .1);
+    cursor: pointer;
+    transition: 1s all;
+
+    &:hover {
+      background: rgba(white, .2);
+    }
+
+    &:first-child {
+      border: none;
+    }
 
     input {
       margin-right: .5rem;
@@ -59,10 +104,32 @@ button {
     span {
       color: rgba($dark, .5);
       font-size: 1rem;
+      margin-left: .5rem;
     }
   }
 }
 
 .error {
   color: $red;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 2rem;
+  margin: 2rem;
+  min-width: 70vw;
+
+  .card {
+    background: $light-teal;
+    padding: 2rem;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba($dark, .8);
+
+    h2 {
+      border-bottom: 1px solid $dark;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+  }
 }

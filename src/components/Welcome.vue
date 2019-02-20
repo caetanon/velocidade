@@ -4,15 +4,15 @@
     .screen(v-if="isShowingSprintName")
       label(for="sprintName") Qual o nome da sua sprint?
       input(type="text" name="sprintName" v-model="sprintName")
-      p
+      p.buttons
         button(@click="showHollidays") Próximo
       p(v-if="feedback").error {{ feedback }}
 
     // Hollidays
     .screen(v-if="isShowingHollidays")
       label(for="hollidays") Quantos feriados acontecerão durante a sprint?
-      input(type="number" name="sprintName" v-model="sprintName")
-      p
+      input(type="number" name="sprintName" v-model="hollidays")
+      p.buttons
         button(@click="showSprintName") Anterior
         button(@click="showCerimonies") Próximo
       p(v-if="feedback").error {{ feedback }}
@@ -41,8 +41,9 @@
           input(type="checkbox" v-model="review" @change="sumCerimoniesTime")
           = "Review"
           span  ({{ time.review }}h)
-      p Tempo total em cerimônias {{ totalCerimonyTime }}h
-      p
+      p.totalTime Tempo total em cerimônias:
+        strong {{ totalCerimonyTime }}h
+      p.buttons
         button(@click="showHollidays") Anterior
         button(@click="showTeam") Próximo
       p(v-if="feedback").error {{ feedback }}
@@ -57,14 +58,27 @@
             th Horas/dia
             th Ausências em dias
         tbody
-          tr
-            td: input(type="text" v-model="teamMember" placeholder="digite o nome")
-            td: input(type="number" v-model="hoursPerDay")
-            td: input(type="number" v-model="absense")
-      p
+          tr(v-for="(member, index) in team" :key="'table'+index")
+            td: input(type="text" v-model="team[index].teamMember")
+            td: input(type="number" v-model="team[index].hoursPerDay")
+            td: input(type="number" v-model="team[index].absense")
+      button(@click="addTeamMember") Adicionar membro ao time
+      p.buttons
         button(@click="showHollidays") Anterior
-        button(@click="showSprintName") Próximo
+        button(@click="showResult") Próximo
       p(v-if="feedback").error {{ feedback }}
+
+    .screen(v-if="isShowingResult")
+      h1 {{ sprintName }}
+      p Story Points: {{ totalSprintStoryPoints }} pts
+      p Feriados: {{ hollidays }} dias
+      p Cerimônias: {{ totalCerimonyTime }} horas
+
+      .cards
+        .card(v-for="(member, index) in team" :key="index")
+          h2 {{ member.teamMember }}
+          p {{ member.hoursPerDay }} horas/dias
+          p {{ member.absense ? member.absense : 'Sem' }} {{ member.absense > 1 ? 'ausências programadas' : 'ausência programada' }} 
 </template>
 
 <script>
@@ -74,13 +88,13 @@ export default {
     return {
       feedback: null,
 
-      sprintName: null,
+      sprintName: '',
       isShowingSprintName: true,
 
       hollidays: 0,
       isShowingHollidays: false,
 
-      totalCerimonyTime: 8,
+      totalCerimonyTime: 10,
       isShowingCerimonies: false,
       aep: true,
       planning: true,
@@ -96,16 +110,24 @@ export default {
       },
 
       isShowingTeam: false,
-      team: [],
-      teamMember: '',
-      hoursPerDay: 8,
-      absense: 0,
+      team: [
+        {
+          teamMember: '😎',
+          hoursPerDay: 8,
+          absense: 0
+        }
+      ],
+
+      isShowingResult: false,
+      totalSprintStoryPoints: 0
     }
   },
   methods: {
     hideAllScreens(){
       this.isShowingSprintName = false;
       this.isShowingHollidays = false;
+      this.isShowingCerimonies = false;
+      this.isShowingTeam = false;
     },
     showSprintName(){
       this.hideAllScreens();
@@ -123,6 +145,10 @@ export default {
       this.hideAllScreens();
       this.isShowingTeam = true;
     },
+    showResult(){
+      this.hideAllScreens();
+      this.isShowingResult = true;
+    },
 
     sumCerimoniesTime(){
       this.totalCerimonyTime = 0;
@@ -131,6 +157,13 @@ export default {
       this.totalCerimonyTime += this.grooming ? this.time.grooming : 0;
       this.totalCerimonyTime += this.prereview ? this.time.prereview : 0;
       this.totalCerimonyTime += this.review ? this.time.review : 0;
+    },
+    addTeamMember(){
+      this.team.push({
+        teamMember: '',
+        hoursPerDay: 8,
+        absense: 0,
+      })
     }
   }
 }
