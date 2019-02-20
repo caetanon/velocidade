@@ -1,0 +1,68 @@
+@import '_variables';
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  font-size: 10px;
+}
+body {
+  color: $dark;
+  background: $teal;
+  font-size: 1.6rem;
+}
+
+button {
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  border: none;
+  background: $dark;
+  color: $teal;
+  transition: .5s all;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $light-teal;
+    color: $dark;
+  }
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  > label {
+    padding: 0 0 2rem;
+    font-size: 2rem;
+  }
+}
+
+.selectionBox {
+  display: block;
+  padding: 2rem 3rem;
+  background-color: $light-teal;
+
+  label {
+    display: flex;
+    align-items: center;
+
+    input {
+      margin-right: .5rem;
+      vertical-align: middle;
+    }
+
+    span {
+      color: rgba($dark, .5);
+      font-size: 1rem;
+    }
+  }
+}
+
+.error {
+  color: $red;
+}
