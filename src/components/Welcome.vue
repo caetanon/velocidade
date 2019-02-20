@@ -1,17 +1,32 @@
 <template lang="pug">
   #welcome
+    // Previous Sprint name
+    .screen(v-if="isShowingPreviousSprint")
+      h2 Dados da sua sprint anterior:
+      .previousSprint
+        label(for="previousSprintDays")
+          = "Quantos dias tiveram na Sprint Anterior"
+          input(type="number" name="previousSprintDays" v-model="previousSprintDays")
+        label(for="previousSprintPoints")
+          = "Quantos dias tiveram na Sprint Anterior"
+          input(type="number" name="previousSprintPoints" v-model="previousSprintPoints")
+      p.buttons
+        button(@click="showSprintName") Próximo
+      p(v-if="feedback").error {{ feedback }}
+    
     // Sprint name
     .screen(v-if="isShowingSprintName")
       label(for="sprintName") Qual o nome da sua sprint?
-      input(type="text" name="sprintName" v-model="sprintName")
+      input(type="text" name="sprintName" v-model="sprint.name")
       p.buttons
+        button(@click="showPreviousSprint") Anterior
         button(@click="showHollidays") Próximo
       p(v-if="feedback").error {{ feedback }}
 
     // Hollidays
     .screen(v-if="isShowingHollidays")
       label(for="hollidays") Quantos feriados acontecerão durante a sprint?
-      input(type="number" name="sprintName" v-model="hollidays")
+      input(type="number" name="hollidays" v-model="hollidays")
       p.buttons
         button(@click="showSprintName") Anterior
         button(@click="showCerimonies") Próximo
@@ -56,7 +71,7 @@
           tr
             th Membro do Time
             th Horas/dia
-            th Ausências em dias
+            th Ausências em dias (sem contar os feriados)
         tbody
           tr(v-for="(member, index) in team" :key="'table'+index")
             td: input(type="text" v-model="team[index].teamMember")
@@ -69,16 +84,19 @@
       p(v-if="feedback").error {{ feedback }}
 
     .screen(v-if="isShowingResult")
-      h1 {{ sprintName }}
+      h1 {{ sprint.name }}
       p Story Points: {{ totalSprintStoryPoints }} pts
       p Feriados: {{ hollidays }} dias
       p Cerimônias: {{ totalCerimonyTime }} horas
+      p Capacity: {{ sprintCapacityDays }} dias
 
       .cards
-        .card(v-for="(member, index) in team" :key="index")
+        .card(v-for="(member, index) in validTeam" :key="index")
           h2 {{ member.teamMember }}
           p {{ member.hoursPerDay }} horas/dias
           p {{ member.absense ? member.absense : 'Sem' }} {{ member.absense > 1 ? 'ausências programadas' : 'ausência programada' }} 
+          p Working Days: {{ member.workingDays }} dias
+          p Capacity: {{ member.capacityHours }} horas | {{ member.capacityDays }} dias
 </template>
 
 <script>
@@ -88,8 +106,15 @@ export default {
     return {
       feedback: null,
 
-      sprintName: '',
-      isShowingSprintName: true,
+      isShowingPreviousSprint: true,
+      previousSprintDays: 10,
+      previousSprintPoints: 40,
+      
+      sprint: {
+        name: '',
+        capacityDays: 0,
+      },
+      isShowingSprintName: false,
 
       hollidays: 0,
       isShowingHollidays: false,
@@ -113,7 +138,7 @@ export default {
       team: [
         {
           teamMember: '😎',
-          hoursPerDay: 8,
+          hoursPerDay: 6,
           absense: 0
         }
       ],
@@ -124,10 +149,15 @@ export default {
   },
   methods: {
     hideAllScreens(){
+      this.isShowingPreviousSprint = false;
       this.isShowingSprintName = false;
       this.isShowingHollidays = false;
       this.isShowingCerimonies = false;
       this.isShowingTeam = false;
+    },
+    showPreviousSprint(){
+      this.hideAllScreens();
+      this.isShowingPreviousSprint = true;
     },
     showSprintName(){
       this.hideAllScreens();
@@ -161,13 +191,47 @@ export default {
     addTeamMember(){
       this.team.push({
         teamMember: '',
-        hoursPerDay: 8,
+        hoursPerDay: 6,
         absense: 0,
       })
+    },
+  
+  },
+  computed: {
+    sprintWorkingDays(){
+      return 10 - this.hollidays;
+    },
+    validTeam() {
+      return this.team.map(member => {
+        const validMember = { ...member };
+        validMember.workingDays = this.sprintWorkingDays - validMember.absense;
+        validMember.capacityHours = (validMember.workingDays*validMember.hoursPerDay)-this.totalCerimonyTime;
+        validMember.capacityDays = validMember.capacityHours/8;
+        return validMember;
+      });
+      
+    },
+    sprintCapacityDays(){
+      return this.validTeam.reduce((acc,member) => acc+parseFloat(member.capacityDays), 0)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.previousSprint {
+  display: grid;
+  grid-gap: 2rem;
+  grid-template-rows: 1fr 1fr;
+  padding: 3rem 0;
+  
+  label {
+    display: inline-block;
+    
+    input {
+      display: block;
+      width: 100%;
+    }
+  }
+}
 </style>
